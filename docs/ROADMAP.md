@@ -17,7 +17,7 @@
 **Goal**: Working CLI prototype that reviews PHP files via Gemini API.
 
 - [x] Day 1: Repository structure and documentation
-- [ ] Day 2: Local dev environment (Docker, Postgres, Redis)
+- [x] Day 2: Local dev environment (Docker, Postgres, Redis)
 - [ ] Day 3: First LLM API integration (Gemini)
 - [ ] Day 4: LLM Provider abstraction
 - [ ] Day 5: Embeddings and vector store basics
