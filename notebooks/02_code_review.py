@@ -7,6 +7,7 @@ import asyncio
 from pathlib import Path
 
 from google import genai
+
 from src.core.config import settings
 
 SAMPLE_FILE = Path("notebooks/samples/bad_module.php")
@@ -95,9 +96,9 @@ async def main():
     ]
 
     for name, func in experiments:
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print(f"  {name}")
-        print(f"{'='*60}\n")
+        print(f"{'=' * 60}\n")
 
         result = await func(client, code)
         print(result)

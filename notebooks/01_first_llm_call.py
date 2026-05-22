@@ -4,7 +4,9 @@ This is a learning script, not production code.
 """
 
 import asyncio
+
 from google import genai
+
 from src.core.config import settings
 
 

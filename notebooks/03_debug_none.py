@@ -2,7 +2,9 @@
 
 import asyncio
 from pathlib import Path
+
 from google import genai
+
 from src.core.config import settings
 
 SAMPLE_FILE = Path("notebooks/samples/bad_module.php")
@@ -30,14 +32,16 @@ async def main():
     for i, candidate in enumerate(response.candidates):
         print(f"\n--- Candidate {i} ---")
         print(f"finish_reason: {candidate.finish_reason}")
-        print(f"parts count: {len(candidate.content.parts) if candidate.content else 0}")
+        print(
+            f"parts count: {len(candidate.content.parts) if candidate.content else 0}"
+        )
         if candidate.content:
             for j, part in enumerate(candidate.content.parts):
                 print(f"  part {j}: type={type(part).__name__}")
                 if hasattr(part, "text") and part.text:
                     print(f"  text (first 200 chars): {part.text[:200]}")
                 if hasattr(part, "thought") and part.thought:
-                    print(f"  thought: True")
+                    print("  thought: True")
 
     print(f"\nusage: {response.usage_metadata}")
 
