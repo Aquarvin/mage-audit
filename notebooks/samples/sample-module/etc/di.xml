@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+
+    <!-- Preference: replace interface with implementation -->
+    <preference for="Vendor\OrderManager\Api\OrderProcessorInterface"
+                type="Vendor\OrderManager\Model\OrderProcessor"/>
+
+    <preference for="Vendor\OrderManager\Api\DiscountCalculatorInterface"
+                type="Vendor\OrderManager\Model\DiscountCalculator"/>
+
+    <!-- Plugin: modify behavior of existing class -->
+    <type name="Magento\Sales\Api\OrderRepositoryInterface">
+        <plugin name="vendor_order_manager_order_save_plugin"
+                type="Vendor\OrderManager\Plugin\OrderSavePlugin"
+                sortOrder="10"/>
+    </type>
+
+    <type name="Magento\Sales\Model\Order">
+        <plugin name="vendor_order_manager_order_status_plugin"
+                type="Vendor\OrderManager\Plugin\OrderStatusPlugin"
+                sortOrder="20"
+                disabled="false"/>
+    </type>
+
+    <!-- Virtual type -->
+    <virtualType name="Vendor\OrderManager\Model\VirtualLogger"
+                 type="Magento\Framework\Logger\Monolog">
+        <arguments>
+            <argument name="name" xsi:type="string">order_manager</argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Type with constructor arguments -->
+    <type name="Vendor\OrderManager\Model\OrderProcessor">
+        <arguments>
+            <argument name="logger" xsi:type="object">Vendor\OrderManager\Model\VirtualLogger</argument>
+            <argument name="discountThreshold" xsi:type="number">1000</argument>
+        </arguments>
+    </type>
+</config>

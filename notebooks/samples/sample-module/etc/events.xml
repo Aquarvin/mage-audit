@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+
+    <event name="sales_order_place_after">
+        <observer name="vendor_order_manager_process_order"
+                  instance="Vendor\OrderManager\Observer\OrderPlaceAfter"
+                  method="execute"/>
+    </event>
+
+    <event name="sales_order_save_before">
+        <observer name="vendor_order_manager_validate_order"
+                  instance="Vendor\OrderManager\Observer\OrderValidation"
+                  method="execute"/>
+    </event>
+
+    <event name="checkout_submit_all_after">
+        <observer name="vendor_order_manager_post_checkout"
+                  instance="Vendor\OrderManager\Observer\PostCheckout"
+                  method="execute"
+                  disabled="false"/>
+    </event>
+</config>
