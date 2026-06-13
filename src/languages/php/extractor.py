@@ -116,7 +116,7 @@ class PHPExtractor:
                 start_line=class_node.start_point[0] + 1,
                 end_line=class_node.end_point[0] + 1,
                 namespace=namespace,
-                dependencies=dependencies,
+                dependencies=list(dependencies),
             )
         )
 
@@ -188,7 +188,7 @@ class PHPExtractor:
             visibility=visibility,
             class_name=class_name,
             namespace=namespace,
-            dependencies=dependencies,
+            dependencies=list(dependencies),
         )
 
     def _extract_function(
@@ -212,7 +212,7 @@ class PHPExtractor:
             start_line=func_node.start_point[0] + 1,
             end_line=func_node.end_point[0] + 1,
             namespace=namespace,
-            dependencies=dependencies,
+            dependencies=list(dependencies),
         )
 
     def _extract_visibility(self, node: Node, code_bytes: bytes) -> str | None:
