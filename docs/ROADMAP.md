@@ -21,7 +21,7 @@
 - [x] Day 3: First LLM API integration (Gemini)
 - [x] Day 4: LLM Provider abstraction
 - [x] Day 5: Embeddings and vector store basics
-- [ ] Day 6-7: First working CLI prototype + CI
+- [x] Day 6-7: First working CLI prototype + CI
 
 ## Phase 1: Magento Knowledge Layer (Weeks 2-3)
 
