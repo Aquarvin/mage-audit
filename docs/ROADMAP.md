@@ -32,8 +32,10 @@
 - [ ] Day 5: Index real Magento module
 - [ ] Day 6-7: Search API endpoint + demo video
 
-Will be detailed when Phase 0 completes.
-
 ## Phase 2: RAG Pipeline & MVP (Weeks 4-6)
 
 Will be detailed when Phase 1 completes.
+
+## Phase 3: Evaluation Framework (Weeks 7-9)
+
+Will be detailed when Phase 2 completes.
