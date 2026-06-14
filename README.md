@@ -112,6 +112,8 @@ uv run mage-audit review path/to/file.php --repo my-module
 - **GitHub Actions** for CI (lint + test)
 
 ## Project Structure
+
+```
 src/
 ├── core/                    # Universal AI Engine
 │   ├── llm/                # LLM provider abstraction (Gemini, Claude, OpenAI, Ollama)
@@ -122,6 +124,7 @@ src/
 ├── frameworks/magento/     # Magento config parser + module indexer
 ├── api/                    # FastAPI endpoints
 └── cli/                    # CLI via Typer
+```
 
 ## Documentation
 
