@@ -36,7 +36,7 @@
 
 - [x] Day 1: RAG Review Service — search + LLM review with project context
 - [x] Day 2: Multi-strategy retrieval + fallback parsing (0 lost findings)
-- [ ] Day 3: RAG evaluation — compare Simple vs RAG quality
+- [x] Day 3: RAG evaluation — compare Simple vs RAG quality
 
 ## Phase 3: Evaluation Framework (Weeks 7-9)
 
