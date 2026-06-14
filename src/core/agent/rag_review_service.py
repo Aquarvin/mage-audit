@@ -121,35 +121,77 @@ class RAGReviewService:
         )
 
     async def _build_context(self, code: str, repo_name: str, file_path: str) -> str:
-        """Search for relevant context in the indexed codebase."""
-        # Use the code itself as search query — find similar code
-        # Take first 500 chars as query (embedding models have limits)
-        query = code[:500]
+        """Search for relevant context using multiple strategies."""
+        all_results = []
+        seen_keys = set()
 
+        # Strategy 1: Search by code content (first 300 chars)
+        code_query = code[:300]
         results = await self._search.search(
-            query=query,
+            query=code_query,
             repo_name=repo_name,
-            limit=self._context_chunks,
+            limit=3,
             min_similarity=self._min_similarity,
         )
+        for r in results:
+            key = f"{r.file_path}::{r.chunk_name}"
+            if key not in seen_keys:
+                seen_keys.add(key)
+                all_results.append(r)
 
-        # Filter out chunks from the same file (don't show the file to itself)
-        results = [r for r in results if r.file_path != file_path]
+        # Strategy 2: Search by class/function names extracted from code
+        names_query = self._extract_names_for_search(code)
+        if names_query:
+            results = await self._search.search(
+                query=names_query,
+                repo_name=repo_name,
+                limit=3,
+                min_similarity=self._min_similarity,
+            )
+            for r in results:
+                key = f"{r.file_path}::{r.chunk_name}"
+                if key not in seen_keys:
+                    seen_keys.add(key)
+                    all_results.append(r)
 
-        if not results:
+        # Strategy 3: Search by imports/dependencies
+        deps_query = self._extract_deps_for_search(code)
+        if deps_query:
+            results = await self._search.search(
+                query=deps_query,
+                repo_name=repo_name,
+                limit=3,
+                min_similarity=self._min_similarity,
+            )
+            for r in results:
+                key = f"{r.file_path}::{r.chunk_name}"
+                if key not in seen_keys:
+                    seen_keys.add(key)
+                    all_results.append(r)
+
+        # Filter out chunks from the same file
+        all_results = [r for r in all_results if r.file_path != file_path]
+
+        # Sort by similarity and take top N
+        all_results.sort(key=lambda r: r.similarity, reverse=True)
+        all_results = all_results[: self._context_chunks]
+
+        if not all_results:
             logger.info("RAG: no relevant context found", file=file_path)
             return ""
 
         logger.info(
             "RAG: context retrieved",
-            chunks=len(results),
-            top_similarity=f"{results[0].similarity:.4f}" if results else "N/A",
+            chunks=len(all_results),
+            strategies_used=len(
+                [q for q in [code_query, names_query, deps_query] if q]
+            ),
+            top_similarity=f"{all_results[0].similarity:.4f}",
         )
 
         # Format context for LLM
         parts = ["## CONTEXT: Related code from this project\n"]
-
-        for r in results:
+        for r in all_results:
             tags = ""
             deps = r.metadata.get("dependencies", [])
             magento_tags = [d for d in deps if d.startswith("[")]
@@ -163,6 +205,40 @@ class RAGReviewService:
             )
 
         return "\n".join(parts)
+
+    @staticmethod
+    def _extract_names_for_search(code: str) -> str:
+        """Extract class and method names from code for search query."""
+        import re
+
+        names = []
+
+        # Find class name
+        match = re.search(r"class\s+(\w+)", code)
+        if match:
+            names.append(match.group(1))
+
+        # Find method names
+        for match in re.finditer(r"function\s+(\w+)", code):
+            name = match.group(1)
+            if name != "__construct":
+                names.append(name)
+
+        return " ".join(names) if names else ""
+
+    @staticmethod
+    def _extract_deps_for_search(code: str) -> str:
+        """Extract use statements / dependencies for search query."""
+        import re
+
+        deps = []
+        for match in re.finditer(r"use\s+([\w\\]+);", code):
+            # Take last part of namespace
+            full = match.group(1)
+            short = full.split("\\")[-1]
+            deps.append(short)
+
+        return " ".join(deps[:5]) if deps else ""
 
     def _build_user_message(self, file_path: str, code: str, context: str) -> str:
         """Build the user message with file + context."""
@@ -203,7 +279,7 @@ class RAGReviewService:
         findings = []
         for item in data:
             try:
-                findings.append(Finding.model_validate(item))
+                findings.append(Finding.from_llm_output(item))
             except Exception as e:
                 logger.warning("Skipping invalid finding", error=str(e))
 

@@ -107,7 +107,7 @@ class ReviewService:
         findings = []
         for item in data:
             try:
-                findings.append(Finding.model_validate(item))
+                findings.append(Finding.from_llm_output(item))
             except Exception as e:
                 logger.warning("Skipping invalid finding", error=str(e))
 
