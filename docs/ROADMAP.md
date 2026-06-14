@@ -35,7 +35,7 @@
 ## Phase 2: RAG Pipeline & MVP (Weeks 4-6) 🚧
 
 - [x] Day 1: RAG Review Service — search + LLM review with project context
-- [ ] Day 2: Improved retrieval (multiple search strategies)
+- [x] Day 2: Multi-strategy retrieval + fallback parsing (0 lost findings)
 - [ ] Day 3: RAG evaluation — compare Simple vs RAG quality
 
 ## Phase 3: Evaluation Framework (Weeks 7-9)
