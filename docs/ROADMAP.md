@@ -29,7 +29,7 @@
 - [x] Day 2: Magento config parsers (di.xml, events.xml, module.xml)
 - [x] Day 3: Module indexer (PHP + config → embeddings → pgvector)
 - [x] Day 4: CLI commands — index and search with Magento tags
-- [ ] Day 5: Index real Magento module
+- [x] Day 5: Index real Magento module
 - [ ] Day 6-7: Search API endpoint + demo video
 
 ## Phase 2: RAG Pipeline & MVP (Weeks 4-6)
