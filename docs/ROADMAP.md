@@ -32,9 +32,11 @@
 - [x] Day 5: Index real Magento module
 - [ ] Day 6-7: Search API endpoint + demo video
 
-## Phase 2: RAG Pipeline & MVP (Weeks 4-6)
+## Phase 2: RAG Pipeline & MVP (Weeks 4-6) 🚧
 
-Will be detailed when Phase 1 completes.
+- [x] Day 1: RAG Review Service — search + LLM review with project context
+- [ ] Day 2: Improved retrieval (multiple search strategies)
+- [ ] Day 3: RAG evaluation — compare Simple vs RAG quality
 
 ## Phase 3: Evaluation Framework (Weeks 7-9)
 
