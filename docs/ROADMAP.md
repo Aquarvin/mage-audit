@@ -1,43 +1,54 @@
 # Roadmap
 
-## Status: Phase 0 — Foundation 🚧
+## Current Status: Phase 2 Complete ✅
 
-| Phase   | Status        | Duration    | Description                |
-| ------- | ------------- | ----------- | -------------------------- |
-| Phase 0 | ✅ Complete    | Week 1      | Foundation setup           |
-| Phase 1 | 🚧 In progress | Weeks 2-3   | Magento Knowledge Layer    |
-| Phase 2 | 📋 Planned     | Weeks 4-6   | RAG Pipeline & Working MVP |
-| Phase 3 | 📋 Planned     | Weeks 7-9   | Evaluation Framework       |
-| Phase 4 | 📋 Planned     | Weeks 10-13 | Production-Ready Service   |
-| Phase 5 | 📋 Planned     | Weeks 14-18 | Advanced Features          |
-| Phase 6 | 📋 Planned     | Weeks 19-21 | Portfolio & Job Search     |
+| Phase   | Status     | Description                                                              |
+| ------- | ---------- | ------------------------------------------------------------------------ |
+| Phase 0 | ✅ Complete | Foundation: repo, Docker, FastAPI, LLM abstraction, embeddings, CLI      |
+| Phase 1 | ✅ Complete | Magento Knowledge Layer: tree-sitter, config parser, module indexer      |
+| Phase 2 | ✅ Complete | RAG Pipeline: context-aware review, multi-strategy retrieval, evaluation |
+| Phase 3 | 📋 Planned  | Production-Ready Service: GitHub App, multi-tenancy, monitoring          |
+| Phase 4 | 📋 Planned  | Advanced Features: fine-tuning, multi-agent, self-improvement            |
+| Phase 5 | 📋 Planned  | Portfolio Packaging: blog posts, demo video, job applications            |
 
-## Phase 0: Foundation (Week 1)
+## Phase 0: Foundation ✅
 
-**Goal**: Working CLI prototype that reviews PHP files via Gemini API.
+- [x] Repository structure with layered architecture
+- [x] Docker Compose (PostgreSQL + pgvector, Redis)
+- [x] FastAPI with /health endpoint
+- [x] LLM Provider abstraction (Gemini implemented)
+- [x] Embedding Provider abstraction (local BGE-small)
+- [x] First working CLI prototype
+- [x] GitHub Actions CI
 
-- [x] Day 1: Repository structure and documentation
-- [x] Day 2: Local dev environment (Docker, Postgres, Redis)
-- [x] Day 3: First LLM API integration (Gemini)
-- [x] Day 4: LLM Provider abstraction
-- [x] Day 5: Embeddings and vector store basics
-- [x] Day 6-7: First working CLI prototype + CI
+## Phase 1: Magento Knowledge Layer ✅
 
-## Phase 1: Magento Knowledge Layer (Weeks 2-3) 🚧
+- [x] Tree-sitter PHP parsing and AST extraction
+- [x] PHPExtractor: classes, methods, functions with metadata
+- [x] Magento config parsers (di.xml, events.xml, module.xml)
+- [x] Module indexer: PHP + config → embeddings → pgvector
+- [x] CLI commands: index and search
+- [x] Tested on real Magento module (TestHobby, 37 chunks)
 
-- [x] Day 1: Tree-sitter PHP parsing and AST extraction
-- [x] Day 2: Magento config parsers (di.xml, events.xml, module.xml)
-- [x] Day 3: Module indexer (PHP + config → embeddings → pgvector)
-- [x] Day 4: CLI commands — index and search with Magento tags
-- [x] Day 5: Index real Magento module
-- [ ] Day 6-7: Search API endpoint + demo video
+## Phase 2: RAG Pipeline ✅
 
-## Phase 2: RAG Pipeline & MVP (Weeks 4-6) 🚧
+- [x] RAG Review Service: search + LLM review with project context
+- [x] Multi-strategy retrieval (code content + names + dependencies)
+- [x] Fallback parsing for LLM output (zero findings lost)
+- [x] Evaluation: RAG recall 69% vs Simple 54% on 13 known issues
+- [x] 10x more project-specific references in RAG mode
 
-- [x] Day 1: RAG Review Service — search + LLM review with project context
-- [x] Day 2: Multi-strategy retrieval + fallback parsing (0 lost findings)
-- [x] Day 3: RAG evaluation — compare Simple vs RAG quality
+## Phase 3: Production-Ready Service (planned)
 
-## Phase 3: Evaluation Framework (Weeks 7-9)
+- [ ] GitHub App / webhook integration
+- [ ] Async job processing for large PRs
+- [ ] Multi-tenancy and cost tracking
+- [ ] Web UI dashboard
+- [ ] Monitoring and observability
 
-Will be detailed when Phase 2 completes.
+## Phase 4: Advanced Features (planned)
+
+- [ ] Fine-tuning on Magento-specific code review data
+- [ ] Multi-agent architecture (security, performance, architecture agents)
+- [ ] Hybrid search (BM25 + embeddings)
+- [ ] Reranking with cross-encoder
