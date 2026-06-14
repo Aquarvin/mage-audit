@@ -84,7 +84,7 @@ class MagentoModuleIndexer:
                     INSERT INTO code_chunks
                         (id, repo_name, file_path, chunk_type, chunk_name, content, embedding, metadata)
                     VALUES ($1, $2, $3, $4, $5, $6, $7::vector, $8::jsonb)
-                    """,# noqa: E501
+                    """,  # noqa: E501
                     uuid.uuid4(),
                     repo_name,
                     chunk.file_path,
