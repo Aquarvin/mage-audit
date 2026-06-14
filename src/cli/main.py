@@ -33,33 +33,25 @@ console = Console()
 def review(
     file: Path = typer.Argument(..., help="Path to PHP file to review.", exists=True),
     model: str = typer.Option("", "--model", "-m", help="LLM model override."),
+    repo: str = typer.Option("", "--repo", "-r", help="Repo name for RAG context."),
     json_output: bool = typer.Option(False, "--json", help="Output raw JSON."),
 ) -> None:
     """Review a PHP file for bugs, security issues, and architecture problems."""
-    asyncio.run(_review(file, model, json_output))
+    asyncio.run(_review(file, model, repo, json_output))
 
 
-def severity_color(severity: Severity) -> str:
-    match severity:
-        case Severity.CRITICAL:
-            return "bold red"
-        case Severity.ERROR:
-            return "red"
-        case Severity.WARNING:
-            return "yellow"
-        case Severity.INFO:
-            return "blue"
-
-
-async def _review(file: Path, model: str, json_output: bool) -> None:
+async def _review(file: Path, model: str, repo: str, json_output: bool) -> None:
     code = file.read_text(encoding="utf-8")
 
+    mode = "RAG" if repo else "Simple"
     console.print(
         Panel(
             f"[bold]Reviewing:[/bold] {file}\n"
             f"[bold]Lines:[/bold] {len(code.splitlines())}\n"
+            f"[bold]Mode:[/bold] {mode}\n"
             f"[bold]Provider:[/bold] {settings.llm_provider}\n"
-            f"[bold]Model:[/bold] {model or settings.llm_model}",
+            f"[bold]Model:[/bold] {model or settings.llm_model}"
+            + (f"\n[bold]Context from:[/bold] {repo}" if repo else ""),
             title="Mage Audit — Review",
             border_style="blue",
         )
@@ -67,8 +59,19 @@ async def _review(file: Path, model: str, json_output: bool) -> None:
 
     with console.status("[bold green]Analyzing code..."):
         llm = get_llm_provider(settings.llm_provider, model=model)
-        service = ReviewService(llm)
-        result = await service.review_file(str(file), code)
+
+        if repo:
+            # RAG mode: search for context, then review
+            from src.core.agent import RAGReviewService
+
+            embedder = LocalEmbedder()
+            search = SearchService(embedder=embedder)
+            service = RAGReviewService(llm=llm, search=search)
+            result = await service.review_file(str(file), code, repo_name=repo)
+        else:
+            # Simple mode: just send file to LLM
+            service = ReviewService(llm)
+            result = await service.review_file(str(file), code)
 
     if json_output:
         output = [f.model_dump() for f in result.findings]
@@ -79,7 +82,7 @@ async def _review(file: Path, model: str, json_output: bool) -> None:
         console.print("[bold green]No issues found![/bold green]")
         return
 
-    table = Table(title=f"Review: {result.file_path}", show_lines=True)
+    table = Table(title=f"Review: {result.file_path} ({mode} mode)", show_lines=True)
     table.add_column("Sev", width=8, justify="center")
     table.add_column("Line", width=6, justify="right")
     table.add_column("Cat", width=12)
@@ -102,12 +105,24 @@ async def _review(file: Path, model: str, json_output: bool) -> None:
             f"[bold red]Critical: {result.critical_count}[/bold red]  "
             f"[red]Error: {result.error_count}[/red]  "
             f"[yellow]Warning: {result.warning_count}[/yellow]  "
-            f"[dim]Model: {result.model} | "
+            f"[dim]Mode: {mode} | Model: {result.model} | "
             f"Tokens: {result.input_tokens} in / {result.output_tokens} out[/dim]",
             title="Summary",
             border_style="dim",
         )
     )
+
+
+def severity_color(severity: Severity) -> str:
+    match severity:
+        case Severity.CRITICAL:
+            return "bold red"
+        case Severity.ERROR:
+            return "red"
+        case Severity.WARNING:
+            return "yellow"
+        case Severity.INFO:
+            return "blue"
 
 
 # ──────────────────────────────────────────────

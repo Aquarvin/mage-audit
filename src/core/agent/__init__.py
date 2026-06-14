@@ -1,5 +1,6 @@
 """Agent layer — code review and search orchestration."""
 
+from src.core.agent.rag_review_service import RAGReviewService
 from src.core.agent.review_service import ReviewService
 from src.core.agent.search_service import SearchResult, SearchService
 from src.core.agent.types import (
@@ -12,6 +13,7 @@ from src.core.agent.types import (
 __all__ = [
     "Category",
     "Finding",
+    "RAGReviewService",
     "ReviewResult",
     "ReviewService",
     "SearchResult",

@@ -81,18 +81,17 @@ class ReviewService:
         )
 
     def _parse_findings(self, raw: str) -> list[Finding]:
-        """Parse LLM output into structured findings.
-
-        Handles common LLM quirks: markdown fences, extra text, etc.
-        """
+        """Parse LLM output into structured findings."""
         text = raw.strip()
 
-        # Strip markdown code fences if present
+        # Strip markdown code fences
         if text.startswith("```"):
-            # Remove first line (```json or ```)
             text = text.split("\n", 1)[1] if "\n" in text else text[3:]
         if text.endswith("```"):
             text = text[:-3].strip()
+
+        # Fix unescaped backslashes by walking character by character
+        text = self._fix_json_backslashes(text)
 
         try:
             data = json.loads(text)
@@ -102,7 +101,7 @@ class ReviewService:
             return []
 
         if not isinstance(data, list):
-            logger.error("LLM output is not a JSON array", type=type(data).__name__)
+            logger.error("LLM output is not a JSON array")
             return []
 
         findings = []
@@ -110,7 +109,40 @@ class ReviewService:
             try:
                 findings.append(Finding.model_validate(item))
             except Exception as e:
-                logger.warning("Skipping invalid finding", error=str(e), item=item)
-                continue
+                logger.warning("Skipping invalid finding", error=str(e))
 
         return findings
+
+    @staticmethod
+    def _fix_json_backslashes(text: str) -> str:
+        """Fix unescaped backslashes in LLM-generated JSON.
+
+        LLMs often produce PHP namespaces like \\Magento\\Sales with
+        inconsistent escaping. This method walks the string character
+        by character and ensures every backslash is properly escaped.
+        """
+        result = []
+        i = 0
+        while i < len(text):
+            if text[i] == "\\" and i + 1 < len(text):
+                next_char = text[i + 1]
+                if next_char in '"\\//bfnrt':
+                    # Valid JSON escape: \", \\, \/, \b, \f, \n, \r, \t
+                    result.append(text[i : i + 2])
+                    i += 2
+                elif (
+                    next_char == "u"
+                    and i + 5 < len(text)
+                    and all(c in "0123456789abcdefABCDEF" for c in text[i + 2 : i + 6])
+                ):
+                    # Valid unicode escape: \uXXXX
+                    result.append(text[i : i + 6])
+                    i += 6
+                else:
+                    # Invalid escape: add extra backslash
+                    result.append("\\\\")
+                    i += 1
+            else:
+                result.append(text[i])
+                i += 1
+        return "".join(result)
