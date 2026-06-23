@@ -98,6 +98,11 @@ uv run mage-audit search my-module "plugin for save" --code
 ```bash
 uv run mage-audit review path/to/file.php --repo my-module
 ```
+## Tests
+
+```bash
+uv run pytest tests/ -v    # 53 tests, ~7 seconds
+```
 
 ## Tech Stack
 
