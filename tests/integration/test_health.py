@@ -6,7 +6,7 @@ from src.api.main import app
 
 @pytest.mark.asyncio
 async def test_health_endpoint():
-    """Health endpoint should return healthy status when all services are up."""
+    """Health endpoint should return healthy status."""
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         response = await client.get("/health")
@@ -15,7 +15,6 @@ async def test_health_endpoint():
 
     data = response.json()
     assert data["status"] == "healthy"
-    assert data["version"] == "0.1.0"
-    assert "database" in data["checks"]
-    assert "redis" in data["checks"]
-    assert "pgvector" in data["checks"]
+    assert "services" in data
+    assert "llm_provider" in data
+    assert "llm_model" in data
