@@ -103,6 +103,11 @@ uv run mage-audit review path/to/file.php --repo my-module
 ```bash
 uv run pytest tests/ -v    # 53 tests, ~7 seconds
 ```
+## GitHub Action
+
+Automatic code review on pull requests. Add `GOOGLE_API_KEY` to repository secrets, and every PR with PHP changes gets an AI review comment.
+
+See [.github/workflows/review.yml](.github/workflows/review.yml).
 
 ## Tech Stack
 
