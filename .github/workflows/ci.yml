@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
-      - run: uv sync --extra dev
+      - run: uv sync --extra dev --extra ai --extra parsing
       - run: uv run ruff check .
       - run: uv run ruff format --check .
 
@@ -45,7 +45,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
-      - run: uv sync --extra dev
+      - run: uv sync --extra dev --extra ai --extra parsing
       - name: Setup pgvector extension
         run: PGPASSWORD=dev_password psql -h localhost -p 5433 -U mageaudit -d mage_audit -c "CREATE EXTENSION IF NOT EXISTS vector;"
       - run: uv run pytest tests/ -v
