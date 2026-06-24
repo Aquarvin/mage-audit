@@ -49,11 +49,7 @@ jobs:
             [ -z "$file" ] && continue
             [ ! -f "$file" ] && continue
 
-            RESULT=$(uv run mage-audit review --json "$file" 2>/dev/null)
-            if [ $? -ne 0 ] || [ -z "$RESULT" ]; then
-              echo "Review returned no results for $file"
-              RESULT="[]"
-            fi
+            RESULT=$(uv run mage-audit review --json "$file" 2>/dev/null) || RESULT="[]"
 
             COUNT=$(echo "$RESULT" | python -c "import sys, json; data=json.load(sys.stdin); print(len(data))" 2>/dev/null || echo "0")
 

@@ -41,6 +41,15 @@ def review(
 
 
 async def _review(file: Path, model: str, repo: str, json_output: bool) -> None:
+     # Suppress all logging when outputting JSON (for CI/piping)
+    if json_output:
+        import logging
+        import structlog
+        logging.disable(logging.CRITICAL)
+        structlog.configure(
+            wrapper_class=structlog.make_filtering_bound_logger(logging.CRITICAL),
+        )
+
     code = file.read_text(encoding="utf-8")
 
     if not json_output:
