@@ -43,46 +43,51 @@ def review(
 async def _review(file: Path, model: str, repo: str, json_output: bool) -> None:
     code = file.read_text(encoding="utf-8")
 
-    mode = "RAG" if repo else "Simple"
-    console.print(
-        Panel(
-            f"[bold]Reviewing:[/bold] {file}\n"
-            f"[bold]Lines:[/bold] {len(code.splitlines())}\n"
-            f"[bold]Mode:[/bold] {mode}\n"
-            f"[bold]Provider:[/bold] {settings.llm_provider}\n"
-            f"[bold]Model:[/bold] {model or settings.llm_model}"
-            + (f"\n[bold]Context from:[/bold] {repo}" if repo else ""),
-            title="Mage Audit — Review",
-            border_style="blue",
+    if not json_output:
+        console.print(
+            Panel(
+                f"[bold]Reviewing:[/bold] {file}\n"
+                f"[bold]Lines:[/bold] {len(code.splitlines())}\n"
+                f"[bold]Mode:[/bold] {'RAG' if repo else 'Simple'}\n"
+                f"[bold]Provider:[/bold] {settings.llm_provider}\n"
+                f"[bold]Model:[/bold] {model or settings.llm_model}"
+                + (f"\n[bold]Context from:[/bold] {repo}" if repo else ""),
+                title="Mage Audit — Review",
+                border_style="blue",
+            )
         )
-    )
 
-    with console.status("[bold green]Analyzing code..."):
-        llm = get_llm_provider(settings.llm_provider, model=model)
+    llm = get_llm_provider(settings.llm_provider, model=model)
 
-        if repo:
-            # RAG mode: search for context, then review
-            from src.core.agent import RAGReviewService
-
-            embedder = LocalEmbedder()
-            search = SearchService(embedder=embedder)
-            service = RAGReviewService(llm=llm, search=search)
-            result = await service.review_file(str(file), code, repo_name=repo)
+    if repo:
+        from src.core.agent import RAGReviewService
+        embedder = LocalEmbedder()
+        search = SearchService(embedder=embedder)
+        service = RAGReviewService(llm=llm, search=search)
+        if not json_output:
+            with console.status("[bold green]Analyzing code with project context..."):
+                result = await service.review_file(str(file), code, repo_name=repo)
         else:
-            # Simple mode: just send file to LLM
-            service = ReviewService(llm)
+            result = await service.review_file(str(file), code, repo_name=repo)
+    else:
+        service = ReviewService(llm)
+        if not json_output:
+            with console.status("[bold green]Analyzing code..."):
+                result = await service.review_file(str(file), code)
+        else:
             result = await service.review_file(str(file), code)
 
     if json_output:
+        import json as json_mod
         output = [f.model_dump() for f in result.findings]
-        console.print_json(json.dumps(output, indent=2))
+        print(json_mod.dumps(output))
         return
 
     if not result.findings:
         console.print("[bold green]No issues found![/bold green]")
         return
 
-    table = Table(title=f"Review: {result.file_path} ({mode} mode)", show_lines=True)
+    table = Table(title=f"Review: {result.file_path} ({'RAG' if repo else 'Simple'} mode)", show_lines=True)
     table.add_column("Sev", width=8, justify="center")
     table.add_column("Line", width=6, justify="right")
     table.add_column("Cat", width=12)
@@ -105,7 +110,7 @@ async def _review(file: Path, model: str, repo: str, json_output: bool) -> None:
             f"[bold red]Critical: {result.critical_count}[/bold red]  "
             f"[red]Error: {result.error_count}[/red]  "
             f"[yellow]Warning: {result.warning_count}[/yellow]  "
-            f"[dim]Mode: {mode} | Model: {result.model} | "
+            f"[dim]Mode: {'RAG' if repo else 'Simple'} | Model: {result.model} | "
             f"Tokens: {result.input_tokens} in / {result.output_tokens} out[/dim]",
             title="Summary",
             border_style="dim",

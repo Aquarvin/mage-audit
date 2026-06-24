@@ -49,11 +49,9 @@ jobs:
             [ -z "$file" ] && continue
             [ ! -f "$file" ] && continue
 
-            echo "Reviewing: $file"
-            RESULT=$(uv run mage-audit review --json "$file" 2>&1)
-            if [ $? -ne 0 ]; then
-              echo "Review failed for $file:"
-              echo "$RESULT"
+            RESULT=$(uv run mage-audit review --json "$file" 2>/dev/null)
+            if [ $? -ne 0 ] || [ -z "$RESULT" ]; then
+              echo "Review returned no results for $file"
               RESULT="[]"
             fi
 
