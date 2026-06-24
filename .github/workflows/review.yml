@@ -24,7 +24,7 @@ jobs:
         uses: astral-sh/setup-uv@v6
 
       - name: Install dependencies
-        run: uv sync --extra ai
+        run: uv sync --extra ai --extra parsing
 
       - name: Find changed PHP files
         id: changed
@@ -50,10 +50,12 @@ jobs:
             [ ! -f "$file" ] && continue
 
             echo "Reviewing: $file"
-            echo "Starting review of $file..."
-            RESULT=$(uv run mage-audit review --json "$file" 2>&1 || echo "[]")
-            echo "Review result length: ${#RESULT}"
-            echo "First 200 chars: ${RESULT:0:200}"
+            RESULT=$(uv run mage-audit review --json "$file" 2>&1)
+            if [ $? -ne 0 ]; then
+              echo "Review failed for $file:"
+              echo "$RESULT"
+              RESULT="[]"
+            fi
 
             COUNT=$(echo "$RESULT" | python -c "import sys, json; data=json.load(sys.stdin); print(len(data))" 2>/dev/null || echo "0")
 
