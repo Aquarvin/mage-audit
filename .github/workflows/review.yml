@@ -37,7 +37,6 @@ jobs:
 
       - name: Run AI review
         if: steps.changed.outputs.count != '0'
-        id: review
         env:
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
           LLM_PROVIDER: gemini
@@ -57,7 +56,7 @@ jobs:
 
             if [ "$COUNT" -gt 0 ]; then
               TOTAL_FINDINGS=$((TOTAL_FINDINGS + COUNT))
-              COMMENT+="### 📄 \`$file\` — $COUNT issue(s)\n\n"
+              COMMENT+="### 📄 ${file} — ${COUNT} issue(s)\n\n"
               COMMENT+="| Severity | Line | Category | Issue | Suggestion |\n"
               COMMENT+="|----------|------|----------|-------|------------|\n"
 
@@ -68,36 +67,35 @@ jobs:
               sev = f.get('severity', '?')
               line = f.get('line', '-')
               cat = f.get('category', '?')
-              issue = f.get('issue', '').replace('|', '\\|').replace('\n', ' ')
-              suggestion = f.get('suggestion', '').replace('|', '\\|').replace('\n', ' ')
+              issue = f.get('issue', '').replace('|', '\\\\|').replace('\n', ' ')
+              suggestion = f.get('suggestion', '').replace('|', '\\\\|').replace('\n', ' ')
               icon = {'critical': '🔴', 'error': '🟠', 'warning': '🟡', 'info': '🔵'}.get(sev, '⚪')
               print(f'| {icon} {sev} | {line} | {cat} | {issue} | {suggestion} |')
           " 2>/dev/null || echo "| ⚠️ | - | - | Failed to parse results | Check logs |")
 
               COMMENT+="$ROWS\n\n"
             else
-              COMMENT+="### 📄 \`$file\` — ✅ No issues found\n\n"
+              COMMENT+="### 📄 ${file} — ✅ No issues found\n\n"
             fi
 
             sleep 2
           done <<< "${{ steps.changed.outputs.files }}"
 
           if [ "$TOTAL_FINDINGS" -gt 0 ]; then
-            COMMENT+="---\n*Found $TOTAL_FINDINGS issue(s). Review powered by [Mage Audit](https://github.com/Aquarvin/mage-audit).*"
+            COMMENT+="\n---\n*Found ${TOTAL_FINDINGS} issue(s). Review powered by [Mage Audit](https://github.com/Aquarvin/mage-audit).*"
           else
-            COMMENT+="---\n*No issues found. Review powered by [Mage Audit](https://github.com/Aquarvin/mage-audit).*"
+            COMMENT+="\n---\n*No issues found. Review powered by [Mage Audit](https://github.com/Aquarvin/mage-audit).*"
           fi
 
-          echo "comment<<EOF" >> $GITHUB_OUTPUT
-          echo -e "$COMMENT" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          echo -e "$COMMENT" > /tmp/review_comment.md
 
       - name: Post review comment
         if: steps.changed.outputs.count != '0'
         uses: actions/github-script@v7
         with:
           script: |
-            const comment = `${{ steps.review.outputs.comment }}`;
+            const fs = require('fs');
+            const comment = fs.readFileSync('/tmp/review_comment.md', 'utf8');
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
