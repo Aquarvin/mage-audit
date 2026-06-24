@@ -3,14 +3,14 @@
 ## Current Status: Phase 2 Complete ✅
 
 
-| Phase   | Status     | Description                                                              |
-| ------- | ---------- | ------------------------------------------------------------------------ |
-| Phase 0 | ✅ Complete | Foundation: repo, Docker, FastAPI, LLM abstraction, embeddings, CLI      |
-| Phase 1 | ✅ Complete | Magento Knowledge Layer: tree-sitter, config parser, module indexer      |
-| Phase 2 | ✅ Complete | RAG Pipeline: context-aware review, multi-strategy retrieval, evaluation |
-| Phase 3 | 📋 Planned | Production-Ready Service: GitHub App, multi-tenancy, monitoring          |
-| Phase 4 | 📋 Planned | Advanced Features: fine-tuning, multi-agent, self-improvement            |
-| Phase 5 | 📋 Planned | Portfolio Packaging: blog posts, demo video, job applications            |
+| Phase   | Status        | Description                                                              |
+| ------- | ------------- | ------------------------------------------------------------------------ |
+| Phase 0 | ✅ Complete    | Foundation: repo, Docker, FastAPI, LLM abstraction, embeddings, CLI      |
+| Phase 1 | ✅ Complete    | Magento Knowledge Layer: tree-sitter, config parser, module indexer      |
+| Phase 2 | ✅ Complete    | RAG Pipeline: context-aware review, multi-strategy retrieval, evaluation |
+| Phase 3 | 🚧 In progress | Production-Ready Service: GitHub App, multi-tenancy, monitoring          |
+| Phase 4 | 📋 Planned     | Advanced Features: fine-tuning, multi-agent, self-improvement            |
+| Phase 5 | 📋 Planned     | Portfolio Packaging: blog posts, demo video, job applications            |
 
 
 ## Phase 0: Foundation ✅
@@ -42,6 +42,9 @@
 
 ## Phase 3: Production-Ready Service (planned)
 
+- [x] REST API endpoints (POST /api/v1/review, POST /api/v1/search)
+- [x] GitHub Action: automatic code review on PRs with PHP changes
+- [x] 53 unit tests (pytest) — findings, JSON parsing, PHP extractor, Magento config
 - [x] GitHub App / webhook integration
 - [ ] Async job processing for large PRs
 - [ ] Multi-tenancy and cost tracking
