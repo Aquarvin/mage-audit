@@ -1,7 +1,6 @@
 """Mage Audit CLI — command-line interface for Magento code analysis."""
 
 import asyncio
-import json
 from pathlib import Path
 
 import typer
@@ -41,10 +40,12 @@ def review(
 
 
 async def _review(file: Path, model: str, repo: str, json_output: bool) -> None:
-     # Suppress all logging when outputting JSON (for CI/piping)
+    # Suppress all logging when outputting JSON (for CI/piping)
     if json_output:
         import logging
+
         import structlog
+
         logging.disable(logging.CRITICAL)
         structlog.configure(
             wrapper_class=structlog.make_filtering_bound_logger(logging.CRITICAL),
@@ -70,6 +71,7 @@ async def _review(file: Path, model: str, repo: str, json_output: bool) -> None:
 
     if repo:
         from src.core.agent import RAGReviewService
+
         embedder = LocalEmbedder()
         search = SearchService(embedder=embedder)
         service = RAGReviewService(llm=llm, search=search)
@@ -88,6 +90,7 @@ async def _review(file: Path, model: str, repo: str, json_output: bool) -> None:
 
     if json_output:
         import json as json_mod
+
         output = [f.model_dump() for f in result.findings]
         print(json_mod.dumps(output))
         return
@@ -96,7 +99,10 @@ async def _review(file: Path, model: str, repo: str, json_output: bool) -> None:
         console.print("[bold green]No issues found![/bold green]")
         return
 
-    table = Table(title=f"Review: {result.file_path} ({'RAG' if repo else 'Simple'} mode)", show_lines=True)
+    table = Table(
+        title=f"Review: {result.file_path} ({'RAG' if repo else 'Simple'} mode)",
+        show_lines=True,
+    )
     table.add_column("Sev", width=8, justify="center")
     table.add_column("Line", width=6, justify="right")
     table.add_column("Cat", width=12)
